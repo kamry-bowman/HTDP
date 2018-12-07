@@ -235,14 +235,27 @@
     (li (word ((text "two"))))
     (li (word ((text "hello"))))))
 
-(define enumFourWord
+(define enumThreeWord
   `(ul
     (li (word ((text "hello"))))
     (li (word ((text "two"))))
     (li ,enumTwoWord)))
 ; XEnum.v2 => Number
 ; Counts the occurences of "hello"
+(check-expect (count-words-xenum enumOneWord "hello") 1)
+(check-expect (count-words-xenum enumTwoWord "hello") 2)
+(check-expect (count-words-xenum enumThreeWord "hello") 3)
+(define (count-words-xenum xe w)
+  (local ((define content (xexpr-content xe))
+          (define (addCount item num)
+            (+ num (count-words-xitem item w))))
+    (foldl addCount 0 content)))
 
+(define (count-words-xitem item w)
+  (local ((define content (first (xexpr-content item))))
+    (cond
+      [(word? content) (if (eq? (word-text content) w) 1 0)]
+      [else (count-words-xenum content w)])))
 
 
 
