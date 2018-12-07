@@ -1,0 +1,46 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 325|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/abstraction)
+
+(define-struct no-info [])
+(define NONE (make-no-info))
+ 
+(define-struct node [ssn name left right])
+; A BT (short for BinaryTree) is one of:
+; – NONE
+; – (make-node Number Symbol BT BT)
+
+(define BTA
+  (make-node
+   15
+   'd
+   NONE
+   (make-node
+    24 'i
+    (make-node
+     90 'f
+     NONE NONE)
+    (make-node
+     4 'e
+     NONE NONE))))
+
+(define BTB
+  (make-node
+   15
+   'd
+   (make-node
+    87 'h NONE NONE)
+   NONE))
+
+
+; BT => [List-of Number]
+;Returns a list of the numbers from all nodes in BT in order
+(check-expect (inorder BTA) '(15 90 24 4))
+(check-expect (inorder BTB )'(87 15))
+(define (inorder BT)
+  (match BT
+    [(no-info) '()]
+    [(node ssn node L R) (append (inorder L) (list ssn) (inorder R))]))
+     
+    

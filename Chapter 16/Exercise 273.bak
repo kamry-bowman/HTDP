@@ -1,0 +1,7 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |Exercise 273|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;[x][y][List-of x][x -> y] -> [List-of y]
+;Accepts a list, and performs a function on each item, returning
+;a new list of the return values
+(define (map-from-fold f l)

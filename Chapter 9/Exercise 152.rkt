@@ -1,0 +1,18 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercise 152|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image)
+
+;Natural Number, Img -> Img
+;creates a vertical arrangement of n copies of img
+(define (col n img)
+  (cond [(zero? n) empty-image]
+        [(positive? n) (above img (col (sub1 n) img))]))
+(define (row n img)
+  (cond [(zero? n) empty-image]
+        [(positive? n) (beside img (row (sub1 n) img))]))
+
+
+
+(define img1 (rectangle 5 5 "outline" "black"))
+(col 5 (row 5 img1))

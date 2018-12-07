@@ -1,0 +1,14 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname |Chapter 12|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+; A Letter is one of the following 1Strings: 
+; – "a"
+; – ... 
+; – "z"
+; or, equivalently, a member? of this list: 
+(define LETTERS
+  (explode "abcdefghijklmnopqrstuvwxyz"))
+
+
+; A Dictionary is a List-of-strings.
+(define AS-LIST (read-lines 'words.txt.'))

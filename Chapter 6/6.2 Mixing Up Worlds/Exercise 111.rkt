@@ -1,0 +1,14 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercise 111|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(define-struct vec [x y])
+; A vec is
+;   (make-vec PositiveNumber PositiveNumber)
+; interpretation represents a velocity vector
+
+(define (check-make-vec x y)
+  (if (and (number? x) (number? y))
+      (if (and (< 0 x) (< 0 y))
+          (make-vec x y)
+          (error "make-vec: positive number expected"))
+      ((error "make-vec: positive number expected")))

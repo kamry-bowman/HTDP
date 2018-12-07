@@ -1,0 +1,25 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |3D Exercise|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+; An R3 is a structure:
+;   (make-r3 Number Number Number)
+;   interpretation: (make-r3 x y z) accepts
+;   3 numbers that resprectively represent a
+;   points distance from the origin on the x,
+;   y, and z planes
+;   given: 3 5 2, expect: (make-r3 3 5 2)
+(define-struct r3 [x y z])
+
+ 
+(define ex1 (make-r3 1 2 13))
+(define ex2 (make-r3 -1 0 3))
+
+
+; R3 -> Number
+; R3-to-origin accepts an R3 structure, and
+; calculates the distance to the R3 point from
+; the origin
+; Given: 5 4 6, Expect: 8.77..
+; Given: 1, 20, -5, Expect: 20.64..
+(define (r3-to-origin p)
+  ...p-x..p-y...p-z...)

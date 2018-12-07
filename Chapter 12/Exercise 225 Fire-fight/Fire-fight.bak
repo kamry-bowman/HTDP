@@ -1,0 +1,10 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname Fire-fight) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/universe)
+(require 2htdp/image)
+
+(define PLANE-COLOR "gray")
+(define PLANE-WIDTH (/ WIDTH 15))
+(define PLANE-FUSELAGE-HEIGHT (/ PLANE-WIDTH 5))
+(define PLANE-WINGS-WIDTH (/ PLANE-WIDTH 5))

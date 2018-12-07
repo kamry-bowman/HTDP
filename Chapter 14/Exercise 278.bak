@@ -1,0 +1,227 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname |Exercise 278|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image)
+(require 2htdp/universe)
+
+(define WIDTH 400)
+(define HEIGHT 400)
+(define BG (empty-scene WIDTH HEIGHT))
+
+(define body-seg-across 16)
+
+(define MAX (- body-seg-across 1))
+
+(define body-seg-radius (/ (/ WIDTH body-seg-across) 2))
+(define body-seg-diameter (* 2 body-seg-radius))
+
+(define CENT-COLOR "red")
+(define FOOD-COLOR "green")
+
+(define BODY-SEG-IMG (circle body-seg-radius "solid" CENT-COLOR))
+(define FOOD-IMG (circle body-seg-radius "solid" FOOD-COLOR))
+(define centipede-speed 1)
+
+; a dir is a structure represented by a posn, with
+; posn-x equal to 1 or -1, and posn-y equal to 1 or -1. Posn-x represents
+; one unit towards the right, Posn-y represents a unit towards the bottom. These are reversed for negative numbers
+
+; a body is a list of posns of body segments representing a centipede. It is either
+; -'()
+; - (cons posn list-of-posn)
+
+
+
+; a Centipe is a structure where
+; (make-centipede Posn List-of-dirs) creates a structure representing
+; a centipede with its body represented by a list of posns, and a posn representing the direction it is currently moving
+(define-struct centipede [body dir])
+
+; a world is a structure where
+; (make-ws centipede food) creates a structure
+; A world (world-state) represents the current state of a centipede, and the current state of food in the world
+(define-struct world [cent food])
+
+; Food is a a Posn, representing the location of food
+
+; Centipede -> Centipede
+; Consumes a tock, and moves the centipede in its current dir
+;(check-expect (tock (make-centipede (list (make-posn 5 5) (make-posn 6 5) (make-posn 7 5)) (make-posn 1 0))) (make-centipede (list (make-posn (+ 5 (* 1 centipede-speed)) 5) (make-posn 5 5) (make-posn 6 5)) (make-posn 1 0)))
+(define (tock ws)
+  (if (eat-success? ws)
+      (make-world (make-centipede (grow-cent (world-cent ws))
+                                  (centipede-dir (world-cent ws)))
+                  (food-create (world-food ws) (world-cent ws)))
+      (make-world (make-centipede (move (centipede-body (world-cent ws)) (centipede-dir (world-cent ws))) (centipede-dir (world-cent ws))) (world-food ws))))
+
+; World-State->Boolean
+; Determines if the first centipede posn occupies the same space as the food, returns true if so, otherwise false
+;(check-expect (eat-success? (make-world (make-centipede (list (make-posn 5 4) (make-posn 6 4)) (make-posn 1 0)) (make-posn 5 4))) #true)
+;(check-expect (eat-success? (make-world (make-centipede (list (make-posn 6 5) (make-posn 6 4)) (make-posn 1 0)) (make-posn 5 4))) #false)
+(define (eat-success? ws)
+  (equal? (first (centipede-body (world-cent ws))) (world-food ws)))
+
+(define (grow-cent c)
+  (move-add-seg (centipede-body c) (centipede-dir c)))
+
+; List-of-Posns Posn -> List-of-Posn
+; Consumes a centipede posn, and returns the centipede posn after one unit of movement
+;(check-expect (move (list (make-posn 5 4)) (make-posn 1 0))
+;              (list (make-posn (+ 5 centipede-speed) 4)))
+;(check-expect (move (list (make-posn 5 4) (make-posn 5 3)) (make-posn 0 -1)) (list (make-posn 5 (- 4 centipede-speed)) (make-posn 5 4)))
+(define (move lop d)
+  (update-body-segs lop d))
+
+;List of Posn, Posn -> List of Posn
+;(check-expect (update-body-segs (list (make-posn 5 4)) (make-posn 1 0)) (list (make-posn (+ 5 centipede-speed) 4)))
+;(check-expect (update-body-segs (list (make-posn 5 4) (make-posn 5 3)) (make-posn 0 -1)) (list (make-posn 5 (- 4 centipede-speed)) (make-posn 5 4)))
+(define (update-body-segs lop d)
+  (move-remove-seg (move-add-seg lop d)))
+
+; List of Posn, Posn -> List of Posn
+; Uses dir Posn to determine a new first posn for a new front body-segment for the centipede
+;(check-expect (move-add-seg (list (make-posn 5 4)) (make-posn 1 0)) (list (make-posn (+ 5 centipede-speed) 4) (make-posn 5 4)))
+;(check-expect (move-add-seg (list (make-posn 5 4) (make-posn 5 3)) (make-posn 0 -1)) (list (make-posn 5 (- 4 centipede-speed)) (make-posn 5 4) (make-posn 5 3)))
+(define (move-add-seg lop d)
+  (cons (make-posn (+ (posn-x (first lop)) (* (posn-x d) centipede-speed)) (+ (posn-y (first lop)) (* (posn-y d) centipede-speed))) lop))
+
+; List of Posn -> List of Posn
+; Removes last Posn from a list of Posn
+;(check-expect (move-remove-seg (list (make-posn 6 4) (make-posn 5 4))) (list (make-posn 6 4)))
+;(check-expect (move-remove-seg (list (make-posn 4 4) (make-posn 5 4) (make-posn 5 3))) (list (make-posn 4 4) (make-posn 5 4)))
+(define (move-remove-seg lop)
+  (cond [(empty? lop) '()]
+        [(empty? (rest lop)) '()]
+        [else (cons (first lop) (move-remove-seg (rest lop)))]))
+
+; Posn Centipede -> Posn 
+; Inputs a posn, representing prior food position, and creates a random Posn for food, making sure it is not the prior food posn
+;(check-satisfied (food-create (make-posn 1 1)) not=-1-1?)
+(define (food-create p c)
+  (food-check-create
+   p c (make-posn (random MAX) (random MAX))))
+ 
+; Posn Centipede Posn -> Posn 
+; generative recursion 
+;Checks whether prior Posn (first posn, representing prior food position) and candidate (second posn, proposed randomly generated posn from food-create) are the same posn. Also checks if candidate posn lies under a space already occupied by centipede. Accepts the candidate if they are different from each other, and the space is not occupied by centipede, otherwise calls food-create again with the input remaining the prior food posn. 
+(define (food-check-create p c candidate)
+  (if (or (equal? p candidate)
+          (member? candidate (centipede-body c)))
+      (food-create p c)
+      candidate))
+ 
+; Posn -> Boolean
+; use for testing only 
+(define (not=-1-1? p)
+  (not (and (= (posn-x p) 1) (= (posn-y p) 1))))
+
+
+  
+; World-state, Key-event -> World-state
+; Consumes a key-event and centipede, changes centipede's direction if key event is directional
+(define (control ws ke)
+  (make-world (directional-cent (world-cent ws) ke)
+              (world-food ws)))
+
+; Centipede, Key-event -> Centipede
+; Consumes a centipede and a key-event, returns centipede with direction based on key-event
+(define (directional-cent c ke)
+  (cond [(string=? ke "right") (set-cent-dir c (make-posn 1 0))]
+        [(string=? ke "left" ) (set-cent-dir c (make-posn -1 0))]
+        [(string=? ke "up" ) (set-cent-dir c (make-posn 0 -1))]
+        [(string=? ke "down") (set-cent-dir c (make-posn 0 1))]
+        [else c]))
+ 
+;Centipede, Posn -> Centipde
+;Sets centipedes dir property to posn
+(define (set-cent-dir c p)
+  (make-centipede (centipede-body c)
+                  (cond [(= (posn-x (centipede-dir c)) (* -1 (posn-x p))) (centipede-dir c)]
+                        [(= (posn-y (centipede-dir c)) (* -1 (posn-y p))) (centipede-dir c)]
+                        [else p])))
+  
+
+; Centipede -> Image
+; Render consumes a centipede and draws it
+(define (render ws)
+               (render-body-segs (centipede-body (world-cent ws))
+                                 (render-obj (world-food ws)
+                                             FOOD-IMG
+                                             BG)))
+
+; World-state -> Image
+; Render consumes a centipede and draws final scene with text explanation
+(define (render-final ws)
+  (place-image/align (text (determine-text (world-cent ws))
+                     50
+                     "black")
+               (* 1/5 WIDTH)
+               (* 1/5 HEIGHT)
+               "left"
+               "top"
+               (render ws)))
+; World-state -> String
+; Reviews world-state and reason for game ending, and returns a string explaining reason for game ending and final score.
+(define (determine-text c)
+  (string-append
+   (cond [(out-of-bounds? (* 2 body-seg-radius (posn-x (first (centipede-body c)))) (* 2 body-seg-radius (posn-y (first (centipede-body c))))) "Game Over \n Hit a wall"]
+         [(crash-self? (first (centipede-body c)) (rest (centipede-body c))) "Game Over \n  Hit self"])
+   "\nScore: "
+   (number->string (length (centipede-body c)))))
+
+; List-of-Posns, Scene -> Image
+; Consumes a list-of-posns, scene, and draws the centipede on the scene
+(define (render-body-segs lop bg)
+  (cond [(empty? lop) bg]
+        [(empty? (rest lop)) (render-obj (first lop) BODY-SEG-IMG bg)]
+        ((cons? (rest lop)) (render-obj (first lop) BODY-SEG-IMG (render-body-segs (rest lop) bg)))))
+
+; Posn, Image -> Image
+; Consumes a posn and an image, and draws the img at posn on bk (background)
+(define (render-obj p img bg)
+  (place-image/align
+   img
+   (* body-seg-radius 2 (posn-x p))
+   (* body-seg-radius 2 (posn-y p))
+   "left"
+   "top"
+   bg))
+
+; World->Boolean
+; Stops the world if it contains a centipede that has a wall or run into itself
+(define (stopper ws)
+  (stopper-cent (world-cent ws)))
+
+; Centipede->Boolean
+; Checks to see if a centipede has crashed into a wall or itself
+(define (stopper-cent c)
+  (or
+   (out-of-bounds? (* 2 body-seg-radius (posn-x (first (centipede-body c)))) (* 2 body-seg-radius (posn-y (first (centipede-body c)))))
+  (crash-self? (first (centipede-body c)) (rest (centipede-body c)))))
+
+; Number -> Boolean
+; Receives a Numbers for x and y of lead centipede posns and checks for inbounds
+(define (out-of-bounds? x y)
+  (or (< x 0)
+      (> (+ x 1) WIDTH)
+      (< y 0)
+      (> (+ y 1) HEIGHT)))
+
+;Posn, Lop -> Boolean
+; Checks to see if lead centipede posn occupies same space as one of the other body posns
+;(check-expect (crash-self? (make-posn 5 4) (list (make-posn 5 5) (make-posn 5 6))) #false)
+;(check-expect (crash-self? (make-posn 5 4) (list (make-posn 5 5) (make-posn 4 5) (make-posn 4 4) (make-posn 5 4))) #true) 
+(define (crash-self? p lop)
+  (member? p lop))
+
+(define (worm-main init)
+  (big-bang init
+    [to-draw render]
+    [on-tick tock .15]
+    [stop-when stopper render-final]
+    [on-key control]
+    ))
+
+;(worm-main (make-world (make-centipede (list (make-posn 5 5) (make-posn 6 5) (make-posn 7 5)) (make-posn 0 1)) (food-create (make-posn 0 0))))
+
+(worm-main (make-world (make-centipede (list (make-posn 5 5) (make-posn 6 5) (make-posn 7 5)) (make-posn 0 1)) (food-create (make-posn 0 0) (make-centipede (list (make-posn 5 5) (make-posn 6 5) (make-posn 7 5)) (make-posn 0 1)))))

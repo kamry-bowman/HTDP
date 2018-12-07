@@ -1,0 +1,40 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercises 2.3|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+
+(define attendees-baseline 120)
+(define ticket-price-baseline 5)
+(define people-change-rate 15)
+(define price-change-rate .10)
+(define cost-per-attendee .04)
+(define fixed-cost 180)
+
+
+(define price-slope (/ people-change-rate price-change-rate))
+
+(define (attendees ticket-price)
+  (- attendees-baseline (* (- ticket-price ticket-price-baseline) price-slope)))
+
+(define (revenue ticket-price)
+  (* ticket-price (attendees ticket-price)))
+
+(define (cost ticket-price)
+  (+ fixed-cost (* cost-per-attendee (attendees ticket-price))))
+
+(define (profit ticket-price)
+  (- (revenue ticket-price) (cost ticket-price)))
+
+(define (profit-alt price)
+  (- (* (+ 120
+           (* (/ 15 0.1)
+              (- 5.0 price)))
+        price)
+     (+ 180
+        (* 0.04
+           (+ 120
+              (* (/ 15 0.1)
+                 (- 5.0 price)))))))
+
+
+  
+    

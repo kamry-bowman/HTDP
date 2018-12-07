@@ -1,0 +1,24 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |Exercise 261|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(define list-a (list 25 24 23 22 21 20 19 18 17 16 15 14 13
+      12 11 10 9 8 7 6 5 4 3 2 1))
+
+(define list-b (list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+      17 18 19 20 21 22 23 24 25)) 
+
+; [< >] Nelon -> Number
+; determines the largest or smallest number in a list
+(check-expect (list-extremity > list-a) 25)
+(check-expect (list-extremity < list-a) 1)
+(check-expect (list-extremity > list-b) 25)
+(check-expect (list-extremity < list-b) 1)
+
+(define (list-extremity comparison nel)
+  (cond [(empty? (rest nel)) (first nel)]
+        [else (local (
+                      (define list-extremity-rest (list-extremity comparison (rest nel)))
+                      )
+                (if (comparison (first nel) list-extremity-rest)
+                  (first nel)
+                  list-extremity-rest))]))

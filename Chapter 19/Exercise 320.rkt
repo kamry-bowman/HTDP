@@ -1,0 +1,30 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 320|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+; An S-expr is one of: 
+; – Number
+; – String
+; – Symbol
+; - '()
+; – (cons S-expr S-expr)
+
+; S-expr -> Boolean
+; Determines whether S-expr is an Atom
+(check-expect (atom? '(3 4)) #false)
+(check-expect (atom? 'k) #true)
+(define (atom? sexp)
+  (or (number? sexp)
+      (string? sexp)
+      (symbol? sexp)))
+
+; S-expr Symbol -> N 
+; counts all occurrences of sy in sexp
+(check-expect (count 'world 'hello) 0)
+(check-expect (count '(world hello) 'hello) 1)
+(check-expect (count '(((world) hello) hello) 'hello) 2)
+(define (count sexp sy)
+  (cond [(number? sexp) 0]
+        [(string? sexp) 0]
+        [(empty? sexp) 0]
+        [(symbol? sexp) (if (symbol=? sexp sy) 1 0)]
+        [else (+ (count (first sexp) sy) (count (rest sexp) sy))]))

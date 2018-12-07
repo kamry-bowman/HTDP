@@ -1,0 +1,24 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |Exercise 267|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;MAP: [XY][List-of X][X -> Y] -> [List-of Y]
+;Insantiate: [List-of N] [N -> N] -> [List-of N]
+
+;[List-of N] -> [List-of N]
+;Receives a list of dollars, and converts to a list of euros, based on $1.06 : 1 euro exchange rate.
+(define DTE (/ 1 1.06))
+(check-expect (convert-euro (list 3 5 10)) (list (* 3 DTE) (* 5 DTE) (* 10 DTE)))
+(define (convert-euro lon)
+  (local ((define (convert n)
+             (* n DTE)))
+          (map convert lon)))
+
+;Instantiate: [List-of Posn] [Posn -> [List-of String]] -> [List-of [List-of String]]
+;[List-of Posn] -> [List-of [List-of String]]
+(check-expect (translate `(,(make-posn 3 5) ,(make-posn 4 8)))
+              '((3 5) (4 8)))
+(define (translate lop)
+  (local ((define (posn-to-string p)
+          `(,(posn-x p) ,(posn-y p))))
+    (map posn-to-string lop)))
+          

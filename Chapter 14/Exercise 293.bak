@@ -1,0 +1,44 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 293|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+; X [List-of X] -> [Maybe [List-of X]]
+; returns the first sublist of l that starts
+; with x, #false otherwise
+(define (find x l)
+  (cond
+    [(empty? l) #false]
+    [else
+     (if (equal? (first l) x)
+         l
+         (find x (rest l)))]))
+
+; X [List-of X] -> [Maybe[List-of X] -> Boolean]
+; Returns a function that accepts a Maybe(list-of x), and determines whether it is a sublist of list-of x argument that starts with arguments x, or is otherwise false
+(define (found x l)
+  (lambda (s)
+    (local ( ; Maybe[List-of-X] -> Boolean
+             ; Determines whether a list-of x is a substring
+             ; starting with x of the original list-of X in
+             ; parent function. Returns true if l is empty and s is true
+            (define (found/xl s)
+              (cond [(empty? l) (boolean=? s #false)]
+                    [else (local ( ; [List-of X] -> Boolean
+                                   ;  Determines whether a list-of x is a
+                                   ; substring starting with x of the original
+                                   ; list-of X in parent function.
+                                  (define (non-empty-found/xl s)
+                                   (cond [(empty? s) #false]
+                                         [else (if (equal? (first l) (first s) x)
+                                                   (local (; [NEList-of X] -> Boolean
+                                                           ; Determines whether two NElist-of x contain the same x in the same order
+                                                           (define (same-list? l s) 
+                                                             (cond [(empty? (rest s)) (equal? (first s) (first l))]
+                                                                   [else (if (equal? (first s) (first l)))
+                                                                         (same-list (rest l) (rest s))
+                                                                         #false])))
+                                                     (same-list? l s)))])))
+                                                   (non-empty-found/xl (rest l) s))])))
+      (found/xl s))
+      ))
+
+;(check-satisfied (find 3 `(2 3 4 5)) (found 3))

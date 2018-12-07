@@ -1,0 +1,29 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |UFO Exercise|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image)
+ (require 2htdp/universe)
+
+ 
+; A Vel is a structure
+;; (make-vel Number Number)
+;; interpretation: (make-vel deltax deltay) creates
+;; a velocity structure with deltax and deltay
+;; representing directional movement on x and y axes
+(define-struct vel [deltax deltay])
+
+(define-struct ufo [loc vel])
+; A UFO is a structure: 
+;   (make-ufo Posn Vel)
+;    interpretation (make-ufo p v) is at location
+;    p moving at velocity v
+
+
+; UFO -> UFO
+; determines where u moves in one clock tick;
+; leaves the velocity as it is
+
+;(define (ufo-move-1 ufo)
+ ; (make-ufo [(make-posn (+ ufo-loc
+
+(define ufo-test (make-ufo (make-posn 5 4) (make-vel 2 1)))

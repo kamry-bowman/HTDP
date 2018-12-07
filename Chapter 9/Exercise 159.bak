@@ -1,0 +1,47 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercise 159|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image)
+
+;Natural Number, Img -> Img
+;creates a vertical arrangement of n copies of img
+(define (col n img)
+  (cond [(zero? n) empty-image]
+        [(positive? n) (above img (col (sub1 n) img))]))
+(define (row n img)
+  (cond [(zero? n) empty-image]
+        [(positive? n) (beside img (row (sub1 n) img))]))
+
+
+(define row-height 10)
+(define col-width 10)
+(define cell (rectangle col-width row-height "outline" "black"))
+
+(define dot-width (/ row-height 5))
+(define dot-color "red")
+(define dot (circle dot-width "solid" dot-color))
+
+
+;Natural Number, Natural Number -> Img
+;creates an N x N grid
+(define (grid r c)
+  (row r (col c cell)))
+
+(define (table-maker r c)
+  (place-image (grid r c)
+               (/ (* r row-height) 2)
+               (/ (* c col-width) 2)
+               (empty-scene (* r row-height) (* col-width c))))
+
+(define (place-dot posn img)
+  (place-image dot
+               (* (posn-x posn) col-width)
+               (* (posn-y posn) row-height)
+               img))
+
+(define (add-balloons lop)
+  (cond [(empty? lop) (table-maker 8 18)]
+        [(cons? lop) (place-dot (first lop) (add-balloons (rest lop)))]))
+
+
+(add-balloons (cons (make-posn 7 8) (cons (make-posn 3 10) (cons (make-posn 3 5) '()))))

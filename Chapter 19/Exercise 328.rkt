@@ -1,0 +1,37 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 328|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+; An S-expr is one of: 
+; – Atom
+; – SL
+ 
+; An SL is one of: 
+; – '()
+; – (cons S-expr SL)
+
+; An Atom is one of: 
+; – Number
+; – String
+; – Symbol
+
+; S-expr -> Boolean
+; Determines whether S-expr is an Atom
+;(check-expect (atom? '(3 4)) #false)
+;(check-expect (atom? 'k) #true)
+(define (atom? sexp)
+  (or (number? sexp)
+      (string? sexp)
+      (symbol? sexp)))
+
+; S-expr Symbol Symbol -> S-expr 
+; substitutes all occurrences of sy1 with sy2 in sexp
+(check-expect (substitute 'world 'hello 'cat) 'world)
+(check-expect (substitute '(world hello) 'hello 'cat) '(world cat))
+(check-expect (substitute '(((world) hello) hello) 'hello 'cat) '(((world) cat) cat))
+(check-expect (substitute `(world ,1 (,"house" ,"usher") cat hello) 'hello 'cat) `(world ,1 (,"house" ,"usher") cat cat))
+
+(define (substitute sexp sy1 sy2)
+  (cond [(atom? sexp) (if (equal? sy1 sexp) sy2 sexp)]
+        [else (map (lambda (s)
+                     (substitute s sy1 sy2))
+                   sexp)]))

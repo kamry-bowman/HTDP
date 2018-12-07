@@ -1,0 +1,10 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |Exercise 272a|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;[x][List-of X][List-of X] -> [List-of-X]
+; Appends list1 to list2
+(check-expect (append-from-fold '(6 5 4) '(3 2 1)) '(6 5 4 3 2 1))
+(check-expect (append-from-fold '() '()) '())
+(define (append-from-fold list1 list2)
+    (foldl cons list2 list1))
+           

@@ -1,0 +1,13 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |List Slice|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(check-expect (slice '(3 2 1 0) 0) '(3 2 1 0))
+(check-expect (slice '(3 2 1 0) 1) '(3 2 1))
+(check-expect (slice '(3 2 1 0) 2) '(3 2))
+(check-expect (slice '(3 2 1 0) 3) '(3))
+(check-expect (slice '(3 2 1 0) 4) '())
+
+(define (slice l s)
+  (if (<= (length l) s)
+      '()
+      (cons (first l) (slice (rest l) s))))

@@ -1,0 +1,92 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 352|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/abstraction)
+
+; A BSL-expr is one of:
+; BSL-value
+; (operator BSL-expr BSL-expr)
+
+; BSL-value
+; is a
+; Symbol
+; Number
+; Boolean
+
+(define-struct add [left right])
+(define-struct mul [left right])
+
+; a boolAnd has the structure (make-boolAnd Boolean Boolean)
+(define-struct boolAnd [left right])
+
+; a boolOr has the structure (make-boolAnd Boolean Boolean)
+(define-struct boolOr [left right])
+
+; a boolNot has the structure (make-boolNot Boolean)
+(define-struct boolNot [expr])
+
+(define (interpreter-expr cand)
+  (local ((define expr
+            (parse cand)))
+          (match expr
+            [(? number?) expr]
+            [(? boolean?) expr]
+            [(add left right)
+             (+ (interpreter-expr left) (interpreter-expr right))]
+            [(mul left right)
+             (* (interpreter-expr left) (interpreter-expr right))]
+            [(boolAnd left right)
+             (and (interpreter-expr left) (interpreter-expr right))]
+            [(boolOr left right)
+             (or (interpreter-expr left) (interpreter-expr right))]
+            [(boolNot bool) (not (interpreter-expr bool))])))
+
+(define (atom? x)
+  (or (symbol? x) (string? x) (number? x)))
+
+(define WRONG "WRONG")
+
+; S-expr -> BSL-expr
+(define (parse s)
+  (cond
+    [(atom? s) (parse-atom s)]
+    [else (parse-sl s)]))
+ 
+; SL -> BSL-expr 
+(define (parse-sl s)
+  (local ((define L (length s)))
+    (cond
+      [(< L 3) (error WRONG)]
+      [(and (= L 3) (symbol? (first s)))
+       (cond
+         [(symbol=? (first s) '+)
+          (make-add (parse (second s)) (parse (third s)))]
+         [(symbol=? (first s) '*)
+          (make-mul (parse (second s)) (parse (third s)))]
+         [else (error WRONG)])]
+      [else (error WRONG)])))
+ 
+; Atom -> BSL-expr 
+(define (parse-atom s)
+  (cond
+    [(number? s) s]
+    [(string? s) (error WRONG)]
+    [(symbol? s) (error WRONG)]))
+
+(check-expect (parse 1) 1)
+(check-error (parse '+))
+(check-error (parse "a"))
+(check-error (parse '(2 3 4 5 6)))
+(check-error (parse '(2 3)))
+(check-error (parse '(2 3 +)))
+(check-expect (parse '(+ 2 3)) (make-add 2 3))
+(check-expect (parse '(* 2 3)) (make-mul 2 3))
+
+(check-expect (interpreter-expr 1) 1)
+(check-error (interpreter-expr '+))
+(check-error (interpreter-expr "a"))
+(check-error (interpreter-expr '(2 3 4 5 6)))
+(check-error (interpreter-expr '(2 3)))
+(check-error (interpreter-expr '(2 3 +)))
+(check-expect (interpreter-expr '(+ 2 3)) 5)
+(check-expect (interpreter-expr '(* 2 3)) 6)

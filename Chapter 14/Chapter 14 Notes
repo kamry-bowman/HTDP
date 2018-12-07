@@ -1,0 +1,19 @@
+; An NELIST is one of:
+; -(cons ITEM '())
+; -(cons ITEM NELIST)
+
+; Exercise 242
+; A [Maybe String] is one of:
+;  - #false
+;  - String
+
+; A [Maybe [List-of String]] is one of:
+;  - #false
+;  - List-of String
+
+; A [List-of [Maybe String]] is one of:
+; - '()
+; - (cons [Maybe String] [List-of [Maybe String]]
+
+
+(cons f (cons 10 (cons (f 10) '())))

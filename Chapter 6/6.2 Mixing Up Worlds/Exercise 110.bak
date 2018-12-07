@@ -1,0 +1,60 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercise 110|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image)
+(require 2htdp/universe)
+
+(define WIDTH 100)
+(define HEIGHT 100)
+
+(define AA-COLOR "white")
+(define BB-COLOR "yellow")
+(define DD-COLOR "green")
+(define ER-COLOR "red")
+
+(define AA "AA")
+(define BB "BB")
+(define DD "DD")
+(define ER "ER")
+
+(define BACKGROUND (empty-scene WIDTH HEIGHT))
+
+
+;helper function for process, check-AA
+;;moves to BB, other stay in AA
+(define (check-AA ke)
+  (if (equal? ke "a") BB AA))
+
+;helper function for process, check-BB
+;;yields BB if "b" or "c", DD if "d", otherwise ER
+(define (check-BB ke)
+  (cond [(equal? ke "b") BB]
+        [(equal? ke "c") BB]
+        [(equal? ke "d") DD]
+        [else ER]))
+
+;a FSM is a String, either
+;AA, which means "start..."
+;BB, which means "expect..."
+;DD, which means "finished..."
+;ER, which means "error..."
+(define (process ws ke)
+  (cond [(equal? ws AA) (check-AA ke)]
+        [(equal? ws BB) (check-BB ke)]
+        [else ws]))
+
+;render helper function
+(define (draw-rect ws)
+  (cond [(equal? ws AA) (rectangle WIDTH HEIGHT "solid" AA-COLOR)]
+        [(equal? ws BB) (rectangle WIDTH HEIGHT "solid" BB-COLOR)]
+        [(equal? ws DD) (rectangle WIDTH HEIGHT "solid" DD-COLOR)]
+        [(equal? ws ER) (rectangle WIDTH HEIGHT "solid" ER-COLOR)]))
+
+;accepts a worldstate and draws an image based on result
+(define (render ws)
+  (place-image (draw-rect ws) (/ WIDTH 2) (/ HEIGHT 2) BACKGROUND))
+
+(define (main ws)
+  (big-bang ws
+    [on-key process]
+    [to-draw render]))

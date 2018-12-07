@@ -1,0 +1,71 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname |Exercise 3.6|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/batch-io)
+(require 2htdp/universe)
+(require 2htdp/image)
+
+;define constants/world physics
+
+(define WORLD-WIDTH 500)
+(define BACKGROUND (empty-scene WORLD-WIDTH WORLD-WIDTH))
+(define Y-CAR (/ WORLD-WIDTH 2))
+
+(define WHEEL-RADIUS 10)
+(define WHEEL-DISTANCE (* WHEEL-RADIUS 2))
+
+
+(define WHEEL
+  (circle WHEEL-RADIUS "solid" "black"))
+(define WHEEL-SPACE
+  (rectangle WHEEL-DISTANCE 0 "solid" "white"))
+(define BOTH-WHEELS
+  (beside WHEEL WHEEL-SPACE WHEEL))
+
+(define CAR-CAB-WIDTH (* 5 WHEEL-RADIUS))
+(define CAR-CAB-HEIGHT WHEEL-RADIUS)
+(define CAR-CHASSIS-WIDTH (* 10 WHEEL-RADIUS))
+(define CAR-CHASSIS-HEIGHT (* 2 WHEEL-RADIUS) )
+
+
+(define TREE-RADIUS 10)
+(define tree
+  (underlay/xy (circle TREE-RADIUS "solid" "green")
+               (TREE-RADIUS (* TREE-RADIUS 1.5)
+               (rectangle (/ TREE-RADIUS 5) (* TREE-RADIUS 2) "solid" "brown"))))
+
+
+
+(define CAR-BODY
+  (above (
+          rectangle CAR-CAB-WIDTH CAR-CAB-HEIGHT "solid" "red")
+         (
+          rectangle CAR-CHASSIS-WIDTH CAR-CHASSIS-HEIGHT "solid" "red")))
+
+(define CAR
+  (overlay/align/offset "center" "bottom" BOTH-WHEELS 0 (* -3/4 WHEEL-RADIUS)  CAR-BODY))
+
+; test statement: (place-image CAR (/ WORLD-WIDTH 2) (/ WORLD-WIDTH 2) (empty-scene WORLD-WIDTH WORLD-WIDTH))
+
+
+
+; WorldState -> WorldState 
+; moves the car by 3 pixels for every clock tick
+; examples:
+;  given: 20, expect 23
+;  given: 78, expect 81
+(define (tock ws)
+  (+ ws 3))
+
+; WorldState -> Image
+; places the car into the BACKGROUND scene,
+; according to the given world state 
+ (define (render ws)
+   (place-image CAR ws Y-CAR BACKGROUND)
+
+ ; WorldState -> WorldState
+; launches the program from some initial state 
+(define (main ws)
+   (big-bang ws
+     [on-tick tock]
+     [to-draw render]))

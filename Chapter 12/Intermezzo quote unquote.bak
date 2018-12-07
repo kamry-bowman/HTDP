@@ -1,0 +1,47 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname |Intermezzo quote unquote|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/web-io)
+
+(define one-list
+  '("Asia: Heat of the Moment"
+    "U2: One"
+    "The White Stripes: Seven Nation Army"))
+
+(define one-list-web
+  '(table (tr (td 1) (td "Asia: Heat of the Moment"))
+          (tr (td 2) (td "U2: One"))
+          (tr (td 3) (td "The White Stripes: Seven Nation Army"))))
+
+; A Song-ranking (SR) is a list, consisting of
+; A number, and a string, where the number representes the ranked order of the song, and the string represents its title
+
+; A List of Song-rankings (LoSR) consists of either:
+; - '()
+; - (cons SR LoSR)
+
+; of the song, and 
+
+; los-> x-expression
+; Consumes a list of songs, and returns a numbered html table list of these to be included in a website
+
+(check-expect (make-rankings one-list) one-list-web)
+
+(define (make-rankings los)
+  '(body))
+
+; List-of-strings -> List-of-list-of-strings
+; Consumes a list of strings, and returns a list of list-of-strings, with each list-of-strings containing a number string, and a title string. The number strings represent the input songs' order from left to right.
+(define (ranking los)
+  (reverse (add-ranks (reverse los))))
+
+; List-of-strings -> List-of-list-of-strings
+; Consumes a list of strings, and returns a list of list-of-strings, with each list-of-strings consisting of a number string and a title string. The number string for the furthest right title string will be the length of the LOS, and the number string will decrease with each title.
+(check-expect (add-ranks '()) '())
+(check-expect (add-ranks '("Song 1" "Song 2")) '(("1" "Song 1") ("2" "Song 2")))
+(define (add-ranks los)
+  (cond
+    [(empty? los) '()]
+    [else (cons (list (length los) (first los))
+                (add-ranks (rest los)))]))
+  
