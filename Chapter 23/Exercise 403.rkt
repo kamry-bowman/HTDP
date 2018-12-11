@@ -188,7 +188,7 @@
           (define schema-1-split (split-right schema-1 1))
           (define new-schema (append (first (split-right schema-1 1)) (rest schema-2)))
           (define (grab-rows cell)
-            (foldr (lambda (row acc) (if (eq? cell (first row))
+            (foldr (lambda (row acc) (if (eq? (first cell) (first row))
                                          (cons (rest row) acc)
                                          acc))
                    '()
@@ -219,6 +219,12 @@
                            ,(make-spec "Points" number?))
                          `((#true "presence" 1) (#false "absence" -2))))
 
+(define db-presence-ext-2 (make-db
+                         `(,(make-spec "Present" boolean?)
+                           ,(make-spec "Description" string?)
+                           ,(make-spec "Points" number?))
+                         `((#true "presence" 1) (#true "here" 1) (#false "absence" -2) (#false "out" -2))))
+
 (define joinEx1 (make-db
                  `(,(make-spec "Name" string?)
                    ,(make-spec "Age" integer?)
@@ -228,9 +234,24 @@
                    ("Bob" 25 "absence" -2)
                    ("Carol" 30 "presence" 1)
                    ("Dave" 32 "absence" -2))))
+
+(define joinEx2 (make-db
+                 `(,(make-spec "Name" string?)
+                   ,(make-spec "Age" integer?)
+                   ,(make-spec "Description" string?)
+                   ,(make-spec "Points" number?))
+                 '(("Alice" 35 "presence" 1)
+                   ("Alice" 35 "here" 1)
+                   ("Bob" 25 "absence" -2)
+                   ("Bob" 25 "out" -2)
+                   ("Carol" 30 "presence" 1)
+                   ("Carol" 30 "here" 1)
+                   ("Dave" 32 "absence" -2)
+                   ("Dave" 32 "out" -2))))
    
 (check-expect (db-content (join school-db presence-db)) (db-content joinEx0))
 (check-expect (db-content (join school-db db-presence-ext)) (db-content joinEx1))
+(check-expect (db-content (join school-db db-presence-ext-2)) (db-content joinEx2))
 
 (db-schema (join school-db db-presence-ext))
   
