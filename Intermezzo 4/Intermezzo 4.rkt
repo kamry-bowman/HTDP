@@ -71,3 +71,24 @@
 (check-expect (inex+ (create-inex 5 1 2) (create-inex 6 1 3)) (create-inex 65 1 2))
 (check-expect (inex+ (create-inex 5 1 12) (create-inex 5 -1 11)) (create-inex 45 1 11))
 (check-expect (inex+ (create-inex 5 -1 12) (create-inex 5 1 11)) (create-inex 45 -1 11))
+
+; Inex Inex => Inex
+(define (inex+ a b)
+  (local ((define sum_result
+            (+ (* (inex-sign a) (inex-mantissa a) (expt 10 (inex-exponent a)))
+               (* (inex-sign b) (inex-mantissa b) (expt 10 (inex-exponent b)))))
+          (define (split-sign n)
+            (if (>= n 0)
+                (list n 1)
+                `(,(* -1 n) -1)))
+          (define m-e
+            (transfer-excess sum_result 0))
+          (define exponent (second m-e))
+          (define m-s (split-sign (first m-e)))
+          (define mantissa (first m-s))
+          (define sign (second m-s)))
+    (if (validate-inex mantissa sign exponent)
+        (create-inex mantissa sign exponent)
+        (error "invalid result"))))
+
+(expt 1.001 1e-12)
