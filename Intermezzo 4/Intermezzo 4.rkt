@@ -35,22 +35,29 @@
 (define (validate-inex m s e)
   (and (<= 0 m 99) (<= 0 e 99) (or (= s 1) (= s -1))))
 
+; Number Number -> (list Number Number)
+; Accepts a mantissa and an exponent. Divides mantissa by 10
+; and increases exponent by 1 until no longer possible
+(define (transfer-excess m e)
+            (if (and (< e 99) (= (floor (/ m 10)) (/ m 10)))
+                (transfer-excess (floor (/ m 10)) (+ e 1))
+                (list m e)))
+(check-expect (transfer-excess 5 0) '(5 0))
+(check-expect (transfer-excess 20 0) '(2 1))
+(check-expect (transfer-excess 21 0) '(21 0))
+(check-expect (transfer-excess 105 2) '(105 2))
+
 ; Inex Inex => Inex
 (define (inex+ a b)
   (local ((define sum_result
-            (+ (* (inex-sign a) (inex-mantissa a))
-               (* (inex-sign b) (inex-mantissa b))))
-          (define (transfer-excess m e)
-            (if (< m 99)
-                (list m e)
-                (transfer-excess (floor (/ m 10)) (+ e 1))
-          ))
+            (+ (* (inex-sign a) (inex-mantissa a) (expt 10 (inex-exponent a)))
+               (* (inex-sign b) (inex-mantissa b) (expt 10 (inex-exponent b)))))
           (define (split-sign n)
             (if (>= n 0)
                 (list n 1)
                 `(,(* -1 n) -1)))
           (define m-e
-            (transfer-excess sum_result (inex-exponent a)))
+            (transfer-excess sum_result 0))
           (define exponent (second m-e))
           (define m-s (split-sign (first m-e)))
           (define mantissa (first m-s))
@@ -61,3 +68,6 @@
 
 (check-expect (inex+ (create-inex 5 1 10) (create-inex 1 1 10)) (create-inex 6 1 10))
 (check-expect (inex+ (create-inex 5 1 10) (create-inex 6 1 10)) (create-inex 11 1 10))
+(check-expect (inex+ (create-inex 5 1 2) (create-inex 6 1 3)) (create-inex 65 1 2))
+(check-expect (inex+ (create-inex 5 1 12) (create-inex 5 -1 11)) (create-inex 45 1 11))
+(check-expect (inex+ (create-inex 5 -1 12) (create-inex 5 1 11)) (create-inex 45 -1 11))
