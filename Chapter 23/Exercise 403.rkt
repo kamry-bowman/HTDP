@@ -158,4 +158,68 @@
                                    ("Dave" 32 #false)
                                    ("John" 42 #true))))
 (check-expect (db-union school-db school-db2) school-db-union)
+
+; [List-of X] [Natural Number] -> [List-of X]
+; Returns the items from list n from end
+(define (take-right lst n)
+  (local ((define (build-up lst n)
+            (cond
+              [(= n 0) (reverse lst)]
+              [(empty? lst) (error "list too short")]
+              [else (build-up (rest lst) (sub1 n))])))
+    (build-up (reverse lst) n)))
+    
+(check-expect (take-right '() 0) '())
+(check-expect (take-right '(a) 0) '(a))
+(check-expect (take-right '(a) 1) '())
+(check-expect (take-right '(a b) 1) '(a))
+(check-expect (take-right '(a b c) 1) '(a b))
+(check-expect (take-right '(a b c) 2) '(a))
+
+; db db => db
+; Accepts two dbs, and performs a join on them, using the
+; last row of the first db, and the first row of the second db
+; as the join column
+(define (join db-1 db-2)
+  (local ((define schema-1 (db-schema db-1))
+          (define schema-2 (db-schema db-2))
+          (define content-1 (db-content db-1))
+          (define content-2 (db-content db-2))
+          (define new-schema (append (take-right schema-1 1) (rest schema-2)))
+          (define (grab-rows cell)
+            '())
+          (define (process-row row)
+            (grab-rows '())))    
+    (make-db new-schema '())))
+
+
+(define joinEx0 (make-db
+                 `(,(make-spec "Name" string?)
+                   ,(make-spec "Age" integer?)
+                   ,(make-spec "Description" string?))
+                 '(("Alice" 35 "presence")
+                   ("Bob" 25 "absence")
+                   ("Carol" 30 "presence")
+                   ("Dave" 32 "absence"))))
+
+(define db-presence-ext (make-db
+                         `(,(make-spec "Present" boolean?)
+                           ,(make-spec "Description" string?)
+                           ,(make-spec "Points" number?))
+                         `((#true "presence" 1) (#false "absence" -2))))
+
+(define joinEx1 (make-db
+                 `(,(make-spec "Name" string?)
+                   ,(make-spec "Age" integer?)
+                   ,(make-spec "Description" string?)
+                   ,(make-spec "Points" number?))
+                 '(("Alice" 35 "presence" 1)
+                   ("Bob" 25 "absence" -2)
+                   ("Carol" 30 "presence" 1)
+                   ("Dave" 32 "absence" -2))))
+   
+(check-expect (db-content (join school-db presence-db)) (db-content joinEx0))
+(check-expect (db-content (join school-db db-presence-ext)) (db-content joinEx1))
+
+(db-schema (join school-db db-presence-ext))
   
