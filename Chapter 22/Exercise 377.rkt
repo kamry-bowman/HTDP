@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-advanced-reader.ss" "lang")((modname |Exercise 376|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname |Exercise 377|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 (require 2htdp/image)
 
 (define a0 '((initial "X")))
@@ -273,6 +273,26 @@
     (li (word ((text "bye"))))
     (li (word ((text "two"))))
     (li ,enumTwoBye)))
+
+; XEnum.v2 => Number
+; Counts the occurences of "hello"
+(check-expect (replace-words-xenum enumOneWord "hello" "bye") enumOneBye)
+(check-expect (replace-words-xenum enumTwoWord "hello" "bye") enumTwoBye)
+(check-expect (replace-words-xenum enumThreeWord "hello" "bye") enumThreeBye)
+(define (replace-words-xenum xe target replace)
+  (local ((define content (xexpr-content xe))
+          (define (handle-one item)
+            (replace-words-xitem item target replace)))
+    (cons 'ul (map handle-one content))))
+
+(define (replace-words-xitem item target replace)
+  (local ((define content (first (xexpr-content item))))
+    (cond
+      [(word? content) (if (eq? (word-text content) target)
+                           `(li (word ((text ,replace))))
+                           item)]
+      [else `(li ,(replace-words-xenum content target replace))])))
+
 
 
 

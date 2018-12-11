@@ -1,0 +1,33 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname |Exercise 403|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+; An S-expr (S-expression) is one of: 
+; – Atom
+; – [List-of S-expr]
+; 
+; An Atom is one of: 
+; – Number
+; – String
+; – Symbol
+
+; S-expr S-expr => Boolean
+(define (sexp=? ex1 ex2)
+  (cond
+    [(empty? ex1) (empty? ex2)]
+    [(number? ex1) (if (number? ex2) (= ex1 ex2) #false)]
+    [(string? ex1) (if (string? ex2) (string=? ex1 ex2) #false)]
+    [(symbol? ex1) (if (symbol? ex2) (symbol=? ex1 ex2) #false)]
+    [(cons? ex1) (if (cons? ex2)
+                     (and (sexp=? (first ex1) (first ex2)) (sexp=? (rest ex1) (rest ex2)))
+                     #false)]
+    [else #false]))
+                  
+
+(check-expect (sexp=? 1 1) #true)
+(check-expect (sexp=? 1 'a) #false)
+(check-expect (sexp=? '(1 a) '(1 a)) #true)
+(check-expect (sexp=? '(1 a) '(1 "hi")) #false)
+(check-expect (sexp=? '(1 a) '(1 (1 a))) #false)
+(check-expect (sexp=? '(1 (1 a)) '(1 (1 a))) #true)
+(check-expect (sexp=? '(1 (1 a)) '(1 (1 1))) #false)
+    
