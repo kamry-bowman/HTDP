@@ -161,20 +161,20 @@
 
 ; [List-of X] [Natural Number] -> [List-of X]
 ; Returns the items from list n from end
-(define (take-right lst n)
-  (local ((define (build-up lst n)
+(define (split-right lst n)
+  (local ((define (build-up lst cache n)
             (cond
-              [(= n 0) (reverse lst)]
+              [(= n 0) `(,(reverse lst) ,cache)]
               [(empty? lst) (error "list too short")]
-              [else (build-up (rest lst) (sub1 n))])))
-    (build-up (reverse lst) n)))
+              [else (build-up (rest lst) (cons (first lst) cache) (sub1 n))])))
+    (build-up (reverse lst) '() n)))
     
-(check-expect (take-right '() 0) '())
-(check-expect (take-right '(a) 0) '(a))
-(check-expect (take-right '(a) 1) '())
-(check-expect (take-right '(a b) 1) '(a))
-(check-expect (take-right '(a b c) 1) '(a b))
-(check-expect (take-right '(a b c) 2) '(a))
+(check-expect (split-right '() 0) '(() ()))
+(check-expect (split-right '(a) 0) '((a) ()))
+(check-expect (split-right '(a) 1) '(() (a)))
+(check-expect (split-right '(a b) 1) '((a) (b)))
+(check-expect (split-right '(a b c) 1) '((a b) (c)))
+(check-expect (split-right '(a b c) 2) '((a) (b c)))
 
 ; db db => db
 ; Accepts two dbs, and performs a join on them, using the
@@ -185,12 +185,23 @@
           (define schema-2 (db-schema db-2))
           (define content-1 (db-content db-1))
           (define content-2 (db-content db-2))
-          (define new-schema (append (take-right schema-1 1) (rest schema-2)))
+          (define schema-1-split (split-right schema-1 1))
+          (define new-schema (append (first (split-right schema-1 1)) (rest schema-2)))
           (define (grab-rows cell)
-            '())
-          (define (process-row row)
-            (grab-rows '())))    
-    (make-db new-schema '())))
+            (foldr (lambda (row acc) (if (eq? cell (first row))
+                                         (cons (rest row) acc)
+                                         acc))
+                   '()
+                   content-2))
+          (define (process-row left-row acc)
+            (local ((define split-left-row (split-right left-row 1)))
+              (append
+               (map (lambda (row) (append (first split-left-row) row))
+                    (grab-rows (second split-left-row)))
+               acc)))
+          (define new-content
+            (foldr process-row '() content-1)))
+    (make-db new-schema new-content)))
 
 
 (define joinEx0 (make-db
