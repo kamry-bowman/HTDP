@@ -120,5 +120,11 @@
 (check-expect (db-content (project school-db '("Name" "Present")))
               (db-content projected-db))
 
-               
+; db [List-of Label] [Any->Boolean] -> [List-of Row]
+; Consumes a database, filters it by predicate, then returns
+; a projection including only columns matching lol labels
+(define (select db lol predicate)
+  (db-content (project (make-db (db-schema db) (filter predicate (db-content db))) lol)))
+
+(check-expect (select school-db `("Name" "Present") (lambda (row) (<= (second row) 30))) '(("Bob" #false) ("Carol" #true)))
 
