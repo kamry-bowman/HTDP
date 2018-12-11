@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 403|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname |Exercise 403|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 
 
 (define-struct db [schema content])
@@ -26,9 +26,9 @@
 
 (define school-content
   '(("Alice" 35 #true)
-           ("Bob" 25 #false)
-           ("Carol" 30 #true)
-           ("Dave" 32 #false)))
+    ("Bob" 25 #false)
+    ("Carol" 30 #true)
+    ("Dave" 32 #false)))
 
 (define school-schema
   (list (make-spec "Name" string?) (make-spec "Age" integer?) (make-spec "Present" boolean?)))
@@ -128,3 +128,34 @@
 
 (check-expect (select school-db `("Name" "Present") (lambda (row) (<= (second row) 30))) '(("Bob" #false) ("Carol" #true)))
 
+; db db => db
+; Consumes two database with identical schemas, and returns a single
+; database with the combined rows. Any duplicates are only included once.
+(define (db-union db1 db2)
+  (local ((define content1 (db-content db1))
+          (define content2 (db-content db2))
+          (define schema (db-schema db1))
+          ; row row -> Boolean
+          ; Determines if rows are unique
+          (define (row-diff? row1 row2)
+            (not (andmap eq? row1 row2)))
+          ; row [List-of rows] -> Boolean
+          ; Determines if a row1 is included in rows
+          (define (row-unique? row1 rows)
+            (andmap (lambda (row) (row-diff? row1 row)) rows))
+          (define uniques-2
+            (filter (lambda (row) (row-unique? row content1)) content2)))
+    (make-db schema (append content1 uniques-2))))
+
+(define school-db2 (make-db school-schema
+                            '(("John" 42 #true)
+                              ("Bob" 25 #false))))
+
+(define school-db-union (make-db school-schema
+                                 '(("Alice" 35 #true)
+                                   ("Bob" 25 #false)
+                                   ("Carol" 30 #true)
+                                   ("Dave" 32 #false)
+                                   ("John" 42 #true))))
+(check-expect (db-union school-db school-db2) school-db-union)
+  
