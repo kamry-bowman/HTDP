@@ -25,8 +25,17 @@
 (check-expect (slope linear2 3) 3)
 
 (define (poly x)
-  (* 3 (expt x 2)))
-(check-expect (slope poly 1) 6)
+  (* 2 (expt x 2)))
+(check-expect (slope poly 1) 4)
 
+; [Number -> Number] Number -> Number
+; Consumes a function and an x value and determines
+; the root of the tangent that passes through (r1, (f r1))
+(define (root-of-tangent f r1)
+  (- r1 (/ (f r1) (slope f r1))))
+
+(check-expect (root-of-tangent linear1 3) 2.5)
+(check-expect (root-of-tangent linear2 3) -2)
+(check-expect (root-of-tangent poly 1) .5) 
 
   
