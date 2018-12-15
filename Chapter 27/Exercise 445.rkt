@@ -10,16 +10,24 @@
 ; generative divides interval in half, the root is in one of the two halves
 ; picks according to (2)
 (define (find-root f left right)
-  (cond
-    [(<= (- right left) epsilon) left]
-    [else
-     (local ((define mid (/ (+ left right) 2))
-             (define f@mid (f mid))
-             (define f@left (f left))
-             (define f@right (f right)))
-       (cond
-         [(or (<= f@left 0 f@mid) (<= f@mid 0 f@left)) (find-root f left mid)]
-         [(or (<= f@right 0 f@mid) (<= f@mid 0 f@right)) (find-root f mid right)]))]))
+  (local ((define (helper f left right f@left f@right)
+           (cond
+             [(<= (- right left) epsilon) left]
+             [else
+              (local ((define mid (/ (+ left right) 2))
+                      (define f@mid (f mid)))
+                (cond
+                  [(or
+                    (<= f@left 0 f@mid)
+                    (<= f@mid 0 f@left))
+                   (helper f left mid (f left) (f mid))]
+                  [(or
+                    (<= f@right 0 f@mid)
+                    (<= f@mid 0 f@right))
+                   (helper f mid right (f mid) (f right))]))])))
+    (helper f left right (f left) (f right))))
+          
+ 
 
 ; Number -> Number
 (define (poly x)
