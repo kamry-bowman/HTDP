@@ -26,6 +26,3 @@
                   [(predicate (first lon)) (splitter (rest lon) false-l (cons (first lon) true-l))]
                   [else (splitter (rest lon) (cons (first lon) false-l) true-l)])))
     (splitter lon '() '())))
-    
-  
-
