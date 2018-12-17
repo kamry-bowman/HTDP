@@ -8,7 +8,7 @@
 ; a and b
 ; assume (< a b) holds
 (define (integrate f left right)
-  (integrate-kepler f left right))
+  (integrate-rect f left right 300))
 
 (define (constant x) 20)
 (check-within (integrate constant 12 22) 200 epsilon)
@@ -27,4 +27,13 @@
     (+
      (* (- r l) f@r)
      (* .5 (- r l) (- f@l f@r)))))
+
+(define (integrate-rect f left right R)
+  (local ((define W (/ (- right left) R))
+          (define S (/ W 2))
+          (define (add-rect f i total)
+            (cond
+              [(= i 0) (+ total (f (+ left S)))] 
+              [else (add-rect f (sub1 i) (+ total (f (+ left (* W i) S))))])))
+    (add-rect f 10 (- R 1))))
   
