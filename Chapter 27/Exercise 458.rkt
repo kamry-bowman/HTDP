@@ -1,14 +1,14 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 458|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-(define epsilon .1)
+(define epsilon .01)
 
 ; [Number -> Number] Number Number -> Number
 ; computes the area under the graph of f between
 ; a and b
 ; assume (< a b) holds
 (define (integrate f left right)
-  (integrate-rect f left right 50))
+  (integrate-dc f left right))
 
 (define (constant x) 20)
 (check-within (integrate constant 12 22) 200 epsilon)
@@ -36,4 +36,11 @@
               [(= i 0) (+ total (* W (f (+ left S))))] 
               [else (add-rect f (sub1 i) (+ total (* W (f (+ left (* W i) S)))))])))
     (add-rect f (- R 1) 0)))
+
+(define (integrate-dc f left right)
+  (local ((define width (- right left))
+          (define half-w (/ width 2)))
+    (cond
+      [(<= width epsilon) (integrate-kepler f left right)]
+      [else (+ (integrate-dc f left (+ left half-w)) (integrate-dc f (+ left half-w) right))])))
   
