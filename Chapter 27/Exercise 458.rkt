@@ -2,13 +2,14 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Exercise 458|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (define epsilon .01)
+(define epsilon-u .001)
 
 ; [Number -> Number] Number Number -> Number
 ; computes the area under the graph of f between
 ; a and b
 ; assume (< a b) holds
 (define (integrate f left right)
-  (integrate-dc f left right))
+  (integrate-adaptive f left right))
 
 (define (constant x) 20)
 (check-within (integrate constant 12 22) 200 epsilon)
@@ -43,4 +44,24 @@
     (cond
       [(<= width epsilon) (integrate-kepler f left right)]
       [else (+ (integrate-dc f left (+ left half-w)) (integrate-dc f (+ left half-w) right))])))
-  
+
+(define (integrate-adaptive f left right)
+  (local ((define (integrate-helper left right full-t)
+            (local ((define width (- right left))
+                    (define half-w (/ width 2))
+                    (define eps-rect (* epsilon-u width)) 
+                    (define left-trapezoid (integrate-kepler f left (+ left half-w)))
+                    (define right-trapezoid (integrate-kepler f (+ left half-w) right)))
+              (cond
+                [(<= (abs (- full-t left-trapezoid right-trapezoid)) eps-rect) full-t]
+                [else
+                 (+
+                  (integrate-helper
+                   left
+                   (+ left half-w)
+                   left-trapezoid)
+                  (integrate-helper
+                   (+ left half-w)
+                   right
+                   right-trapezoid))]))))
+    (integrate-helper left right (integrate-kepler f left right))))
