@@ -8,7 +8,7 @@
 ; a and b
 ; assume (< a b) holds
 (define (integrate f left right)
-  (integrate-rect f left right 300))
+  (integrate-rect f left right 50))
 
 (define (constant x) 20)
 (check-within (integrate constant 12 22) 200 epsilon)
@@ -33,7 +33,7 @@
           (define S (/ W 2))
           (define (add-rect f i total)
             (cond
-              [(= i 0) (+ total (f (+ left S)))] 
-              [else (add-rect f (sub1 i) (+ total (f (+ left (* W i) S))))])))
-    (add-rect f 10 (- R 1))))
+              [(= i 0) (+ total (* W (f (+ left S))))] 
+              [else (add-rect f (sub1 i) (+ total (* W (f (+ left (* W i) S)))))])))
+    (add-rect f (- R 1) 0)))
   
