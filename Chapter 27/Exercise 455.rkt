@@ -24,9 +24,9 @@
   (+ 6 (* 3 x)))
 (check-expect (slope linear2 3) 3)
 
-(define (poly x)
+(define (poly0 x)
   (* 2 (expt x 2)))
-(check-expect (slope poly 1) 4)
+(check-expect (slope poly0 1) 4)
 
 ; [Number -> Number] Number -> Number
 ; Consumes a function and an x value and determines
@@ -36,6 +36,16 @@
 
 (check-expect (root-of-tangent linear1 3) 2.5)
 (check-expect (root-of-tangent linear2 3) -2)
-(check-expect (root-of-tangent poly 1) .5) 
+(check-expect (root-of-tangent poly0 1) .5)
+
+; [Number -> Number] Number -> Number
+; finds a number r such that (f r) is small
+; generative repeatedly generates improved guesses
+(define (newton f r1)
+  (cond
+    [(<= (abs (f r1)) epsilon) r1]
+    [else (newton f (root-of-tangent f r1))]))
+
+
 
   
