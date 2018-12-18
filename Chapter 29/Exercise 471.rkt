@@ -64,11 +64,15 @@
 (define (find-path/list lo-Os D G)
   (cond
     [(empty? lo-Os) #false]
-    [else (local ((define candidate
-                     (find-path (first lo-Os) D G)))
+    [else (local ((define all-acceptable
+                    (foldr (lambda (candidate acc)
+                             (local ((define result (find-path candidate D G)))
+                               (if (boolean? result) acc (cons result acc))))
+                           '()
+                           lo-Os)))
             (cond
-              [(boolean? candidate) (find-path/list (rest lo-Os) D G)]
-              [else candidate]))]))
+              [(empty? all-acceptable) #false]
+              [else (first all-acceptable)]))]))
 
 (find-path 'A 'G sample-graph)
 
@@ -99,5 +103,5 @@
 
 (define cyclic-graph '((A (B E)) (B (E F)) (E (C F)) (C (B D)) (F (D G)) (D ()) (G ())))
 
-(find-path 'B 'C cyclic-graph)
+; (find-path 'B 'C cyclic-graph)
 (test-on-all-nodes cyclic-graph)
