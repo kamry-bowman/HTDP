@@ -96,7 +96,8 @@
     [(empty? loe) #false]
     [(cons? (assq (first loe) G)) #true]
     [else (connects? (rest loe) G)]))
-    
-              
-       
 
+(define cyclic-graph '((A (B E)) (B (E F)) (E (C F)) (C (B D)) (F (D G)) (D ()) (G ())))
+
+(find-path 'B 'C cyclic-graph)
+(test-on-all-nodes cyclic-graph)
