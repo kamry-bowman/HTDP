@@ -43,9 +43,7 @@
     [(= (* -1 xdiff) ydiff) #true]
     [else #false])))
 
-; n [List-of QP] Image -> Image
-;(define (render-queens n loq img)
-;  )
+(define WIDTH 20)
 
 (define (render-board n width)
   (local ((define target (* n n))
@@ -67,7 +65,24 @@
                                          (helper  (add1 current) board)))])))
     (helper 0 (empty-scene (* width n) (* width n)))))
 
-(render-board 8 20)
-                      
+; n [List-of QP] Image -> Image
+(define (render-queens n loq)
+  (local ((define QUEEN (overlay (circle (* WIDTH .4) 'solid 'white)
+                                 (circle (* WIDTH .5) 'solid 'black)))
+          (define (draw-queens loq img)
+            (cond
+              [(empty? loq) img]
+              [else (local ((define a-queen (first loq))
+                            (define row (posn-x a-queen))
+                            (define col (posn-y a-queen))
+                            (define x-place (* (+ row .5) WIDTH))
+                            (define y-place (* (+ col .5) WIDTH)))
+                      (place-image QUEEN x-place y-place
+                                   (draw-queens (rest loq) img)))])))
+    (draw-queens loq (render-board n WIDTH))))
+
+(render-queens 8 `(,q00 ,q44 ,q57 ,q22 ,q63))
+
+
                             
               
