@@ -1,6 +1,8 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname |Exercise 479|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+(require 2htdp/image)
+
 (define QUEENS 8)
 ; A QP is a structure:
 ;   (make-posn CI CI)
@@ -31,7 +33,6 @@
 (check-expect (threatening? q44 q63) #false)
 (check-expect (threatening? q31 q57) #false)
 
-
 (define (threatening? qp1 qp2)
   (local ((define xdiff (- (posn-x qp1) (posn-x qp2)))
           (define ydiff (- (posn-y qp1) (posn-y qp2))))
@@ -41,3 +42,32 @@
     [(= xdiff ydiff) #true]
     [(= (* -1 xdiff) ydiff) #true]
     [else #false])))
+
+; n [List-of QP] Image -> Image
+;(define (render-queens n loq img)
+;  )
+
+(define (render-board n width)
+  (local ((define target (* n n))
+          (define BLACK (square width 'solid 'black))
+          (define WHITE (square width 'outline 'black))
+          (define (helper current board)
+            (cond
+              [(= current target) board]
+              [else (local ((define row (modulo current n))
+                            (define col (quotient current n))
+                            (define this_square
+                              (cond [(even? row) (if (even? col) WHITE BLACK)]
+                                    [else (if (even? col) BLACK WHITE)]))
+                            (define x-place (* row width))
+                            (define y-place (* col width)))
+                      (place-image/align this_square
+                                         x-place y-place
+                                         "left" "top"
+                                         (helper  (add1 current) board)))])))
+    (helper 0 (empty-scene (* width n) (* width n)))))
+
+(render-board 8 20)
+                      
+                            
+              
