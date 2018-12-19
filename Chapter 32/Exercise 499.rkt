@@ -31,4 +31,60 @@
 
 (check-expect (height example) 3)
 
+(check-expect (product.v0 '(2 2 3 5)) 60)
+(define (product.v0 lon)
+  (cond
+    [(empty? lon) 1]
+    [else (* (first lon) (product.v0 (rest lon)))]))
+
+
+(define (product.v1 lon0)
+  (local (; [List-of Number] Number -> Number
+          ; Processes a lon, determines their product
+          ; accumulator: represents the product of all
+          ; numbers in lon0 not in lon0
+          (define (product/a lon a)
+            (cond
+              [(empty? lon) a]
+              [else (product/a (rest lon) (* (first lon) a))])))
+    (product/a lon0 1)))
+(check-expect (product.v1 '(2 2 3 5)) 60)
+
+; N -> Number 
+; adds n to pi without using +
+(check-within (add-to-pi 2) (+ 2 pi) 0.001)
+(define (add-to-pi n0)
+  (local (; Number Number -> Number
+          ; Adds n to pi without using +
+          ; accumulator: represents sum
+          ; of numbers in n0 not in n plus pi
+          (define (add-to-pi/a n a)
+            (cond
+              [(zero? n) a]
+              [else (add-to-pi/a (sub1 n) (add1 a))])))
+    (add-to-pi/a n0 pi)))
+
+; [List-of X] -> [List-of X]
+; consumes a list of X, returns the list as a palindrome
+; with the last item in the input as the middle item in the
+; return value, and the items up the final item in the input following
+; the middle item but in reverse order
+
+(define (palindrome lox0)
+  (local (;[List-of X] [List-of X] -> [List-of X]
+          ; accumulator: a is a list of items in lox0
+          ; not in lox
+          (define (palindrome/a lox a)
+            (cond [(empty? lox) '()]
+                  [(empty? (rest lox)) (append lox0 a)]
+                  [else (palindrome/a (rest lox) (cons (first lox) a))])))
+    (palindrome/a lox0 '())))
+
+(check-expect (palindrome (explode "abcd")) (explode "abcdcba"))
+(palindrome (explode "abcd"))
+    
+
+
+
+
 
