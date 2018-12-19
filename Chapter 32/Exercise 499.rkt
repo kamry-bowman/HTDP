@@ -83,6 +83,25 @@
 (check-expect (palindrome (explode "abcd")) (explode "abcdcba"))
 (palindrome (explode "abcd"))
     
+; Matrix -> Matrix 
+; finds a row that doesn't start with 0 and
+; uses it as the first one
+; generative moves the first row to last place 
+; no termination if all rows start with 0
+(check-expect (rotate-until.v2 '((0 4 5) (1 2 3)))
+              '((1 2 3) (0 4 5)))
+(check-error (rotate-until.v2 '((0 4 5) (0 2 3) (0 3 5))) "all start with 0")
+(define (rotate-until.v2 M0)
+  (local (; Matrix Matrix -> Matrix
+          ; accumulator a represents the unexamined items
+          ; from the original M0
+          (define (rotate/a M a)
+            (cond
+              [(not (= (first (first M)) 0)) M]
+              [(empty? a) (error "all start with 0")]
+              [else
+               (rotate/a (append (rest M) (list (first M))) (rest a))])))
+    (rotate/a M0 M0)))
 
 
 
