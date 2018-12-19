@@ -8,11 +8,27 @@
 (define example
   (make-node (make-node '() (make-node '() '())) '()))
 
+; Tree -> N
+; measures the height of abt0
+
 (define (height abt)
-  (cond
-    [(empty? abt) 0]
-    [else (+ (max (height (node-left abt))
-                  (height (node-right abt)))
-             1)]))
+  (local (; Tree N N -> N
+          ; measures the height of abt
+          ; accumulator s: is the number of steps 
+          ; it takes to reach abt from abt0
+          ; accumulator m: is the maximal height of
+          ; the part of abt0 that is to the left of abt
+          (define (h/a abt s m)
+            (cond
+              [(empty? abt) (max s m)]
+              [else
+               (h/a (node-left abt)
+                     (add1 s)
+                     (h/a (node-right abt)
+                          (add1 s)
+                          0))])))
+    (h/a abt 0 0)))
 
 (check-expect (height example) 3)
+
+
