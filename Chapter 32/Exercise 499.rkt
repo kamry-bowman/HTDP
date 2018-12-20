@@ -88,10 +88,10 @@
 ; uses it as the first one
 ; generative moves the first row to last place 
 ; no termination if all rows start with 0
-(check-expect (rotate-until.v2 '((0 4 5) (1 2 3)))
+(check-expect (rotate.v2 '((0 4 5) (1 2 3)))
               '((1 2 3) (0 4 5)))
-(check-error (rotate-until.v2 '((0 4 5) (0 2 3) (0 3 5))) "all start with 0")
-(define (rotate-until.v2 M0)
+(check-error (rotate.v2 '((0 4 5) (0 2 3) (0 3 5))) "all start with 0")
+(define (rotate.v2 M0)
   (local (; Matrix Matrix -> Matrix
           ; accumulator a represents the unexamined items
           ; from the original M0
@@ -103,7 +103,90 @@
                (rotate/a (append (rest M) (list (first M))) (rest a))])))
     (rotate/a M0 M0)))
 
+(check-expect (rotate.v3 '((0 4 5) (1 2 3)))
+              '((1 2 3) (0 4 5)))
+(check-error (rotate.v3 '((0 4 5) (0 2 3) (0 3 5))) "all start with 0")
+(define (rotate.v3 M0)
+  (local (; Matrix Matrix -> Matrix
+          ; accumulator a represents the already seen items
+          ; from M0
+          (define (rotate/a M seen)
+            (cond
+              [(empty? M) (error "all start with 0")]
+              [(not (= (first (first M)) 0)) (append M seen)]
+              [else (rotate/a (rest M) (cons (first M) seen))])))
+    (rotate/a M0 '())))
 
 
+(define tester (append (build-list 1000 (lambda (x) '(0 1))) '((1 1))))
+; (time (first (rotate.v2 tester)))
+; (time (first (rotate.v3 tester)))
 
+(define (to10 lod0)
+  (local ((define (to10/a lod a s)
+            (cond
+              [(empty? lod) a]
+              [else (to10/a (rest lod)
+                            (+ a (* (first lod) (expt 10 s)))
+                            (add1 s))])))
+    (to10/a (reverse lod0) 0 0)))
+(check-expect (to10 '(1 2 3)) 123)
+(check-expect (to10 '(3 2 1 0 4)) 32104)
 
+; Number -> Boolean
+; determines whether n is prime
+(check-expect (is-prime 2) #true)
+(check-expect (is-prime 3) #true)
+(check-expect (is-prime 4) #false)
+(check-expect (is-prime 5) #true)
+(check-expect (is-prime 6) #false)
+(check-expect (is-prime 7) #true)
+(check-expect (is-prime 8) #false)
+(check-expect (is-prime 47) #true)
+(check-expect (is-prime 49) #false)
+
+(define (is-prime n)
+  (local ((define (prime/a current)
+            (cond
+              [(= current n) #true]
+              [(= (modulo n current) 0) #false]
+              [else (prime/a (add1 current))])))
+    (prime/a 2)))
+
+(define (map.v0 proc l)
+  (cond
+    [(empty? l) '()]
+    [else (cons (proc (first l)) (map.v0 proc (rest l)))]))
+
+(define (map.v1 proc l)
+  (local ((define (map/a l res)
+            (cond
+              [(empty? l) res]
+              [else (map/a (rest l) (cons (proc (first l)) res))])))
+    (map/a (reverse l) '())))
+
+(check-expect (map.v1 (lambda (x) (+ 2 x)) '(1 2 3)) '(3 4 5))
+
+; [X Y] [X Y -> Y] Y [List-of X] -> Y
+(define (f*ldl f e l0)
+  (local (; Y [List-of X] -> Y
+          ; accumulator a represents
+          ; the accumulated Y value from
+          ; previous calls of f using items
+          ;in l0 but not l
+          (define (fold/a a l)
+            (cond
+              [(empty? l) a]
+              [else
+               (fold/a (f (first l) a) (rest l))])))
+    (fold/a e l0)))
+
+; Number [Number -> Any] -> [List-of Any]
+(define (build-l*st n f)
+  (local ((define (build/a n a)
+            (cond
+              [(= n 0) a]
+              [else (build/a (sub1 n) (cons (f (sub1 n)) a))])))
+    (build/a n '())))
+
+(check-expect (build-l*st 10 (lambda (x) x)) (build-list 10 (lambda (x) x)))
