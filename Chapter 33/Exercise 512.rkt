@@ -89,9 +89,11 @@
 ; expression whose parameter is s
 
 (check-expect (undeclareds ex1) ex1)
-(check-expect (undeclareds ex2) '(λ (x) *undeclared))
+(check-expect (undeclareds ex2) '(λ (x) *undeclared:y))
 (check-expect (undeclareds ex3) ex3)
 (check-expect (undeclareds ex4) ex4)
+(check-expect (undeclareds '(λ (x) (λ (y) x))) '(λ (x) (λ (y) x)))
+(check-expect (undeclareds '(λ (x) (λ (y) z))) '(λ (x) (λ (y) *undeclared:z)))
  
 (define (undeclareds le0)
   (local
@@ -101,7 +103,10 @@
      (define (undeclareds/a le declareds)
        (cond
          [(is-var? le)
-          (if (member? le declareds) le '*undeclared)]
+          (if (member? le declareds) le (string->symbol
+                                         (string-append
+                                          "*undeclared:"
+                                          (symbol->string le))))]
          [(is-lambda? le)
           (local ((define para (λ-para le))
                   (define body (λ-body le))
@@ -114,3 +119,5 @@
             (list (undeclareds/a fun declareds)
                   (undeclareds/a arg declareds)))])))
   (undeclareds/a le0 '())))
+
+(undeclareds '(λ (*undeclared) ((λ (x) (x *undeclared)) y)))
